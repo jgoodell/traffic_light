@@ -32,3 +32,10 @@ enter 'start' to launch thetraffic light simulator.
 
 You can exit the application at anytime with ctrl-C which will start the graceful shut down
 sequence, or with ctrl-C again to immediately shut down the traffic light simulator.
+
+## Testing
+To run the unit tests, execute
+``` shell
+$ python setup.py test
+```
+and the unit tests will run.
