@@ -5,7 +5,7 @@ setuptools.setup(
     name='traffic_light',
     version='0.1.dev01',
     packages=setuptools.find_packages(),
-    scripts=['bin/traffic_light.py'],
+    scripts=['bin/tlcli'],
     author='Jason Goodell',
     author_email='jasongoodell@icloud.com',
     incluce_package_data=True,

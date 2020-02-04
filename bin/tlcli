@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+import os
+import cmd
+import sys
+import time
+import argparse
+
+
+import traffic_light
+
+
+class TrafficLightInterface(cmd.Cmd):
+    """Control class definition for the traffic light simulator."""
+    intro = "Starting traffic light..."
+    def do_start(self, arg):
+        """start command definition, arguments to this command are not used."""
+        traffic_lights = [traffic_light.TrafficLight()]
+        self.traffic_light_controller = traffic_light.TrafficLightController(
+            lights=traffic_lights,
+            proceed=self.stdin.proceed,
+            caution=self.stdin.caution,
+            halt=self.stdin.halt
+        )
+        self.traffic_light_controller.initialize()
+        while True: # Main Loop
+            try:
+                self.traffic_light_controller.cycle_lights()
+                sys.stdout.write(str(self.traffic_light_controller.lights[0]))
+                time.sleep(self.traffic_light_controller.duration)
+
+            except KeyboardInterrupt, error:
+                sys.stdout.write('Shutting Down...' + os.linesep)
+                try:
+                    while not self.traffic_light_controller.lights[0].red: # Graceful Shut Down
+                        self.traffic_light_controller.cycle_lights()
+                        sys.stdout.write(str(self.traffic_light_controller.lights[0]))
+                        time.sleep(10)
+                        sys.stdout.write('Completing Graceful Shut Down...' + os.linesep)
+                    break
+                except KeyboardInterrupt, error:
+                    sys.stdout.write('Initiating Immediate Shut Down...' + os.linesep)
+                    break
+
+
+if __name__ == "__main__":
+    # Main for script.
+    parser = argparse.ArgumentParser(description='A CLI Interface to the Traffic Light Simulator')
+    parser.add_argument('-H', '--halt', type=int,
+                        help='Length of time in seconds that halt (RED) lasts.')
+    parser.add_argument('-c', '--caution', type=int,
+                        help='Length of time in seconds that caution (YELOW) lasts.')
+    parser.add_argument('-p', '--proceed', type=int,
+                        help='Length of time in seconds that proceed (GREEN) lasts.')
+    parser.add_argument('-f', '--flashing', type=bool,
+                        help='Whether or not the light is flashing.')
+    args = parser.parse_args()
+    if args.halt and args.caution and args.proceed:
+        tli = TrafficLightInterface(stdin=args)
+    else:
+        sys.stdout.write('Arguments halt, caution and proceed are required.' + os.linesep)
+        parser.print_usage()
+        sys.exit(3)
+    try: # Enter Simulation.
+        tli.cmdloop()
+    except KeyboardInterrupt, error:
+        sys.stderr.write(str(error) + os.linesep)
+        sys.exit(2)
+    except Exception, error:
+        sys.stderr.write(str(error) + os.linesep)
+        sys.exit(4)
